@@ -17,13 +17,17 @@ set(SHADERS
 include(FetchContent)
 
 # Fetch assets
-message("Fetching GLTF assets...")
-FetchContent_Declare(
-    GLTFAssets
-    GIT_REPOSITORY https://github.com/DiligentGraphics/GLTFAssets
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets/models
-)
-FetchContent_MakeAvailable(GLTFAssets)
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/assets/models)
+    message("Fetching GLTF assets...")
+    FetchContent_Declare(
+        GLTFAssets
+        GIT_REPOSITORY https://github.com/DiligentGraphics/GLTFAssets
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets/models
+    )
+    FetchContent_MakeAvailable(GLTFAssets)
+else()
+    message("GLTF assets has existed...")
+endif()
 
 file(GLOB_RECURSE MODELS LIST_DIRECTORIES false assets/models/*.*)
 
