@@ -1,24 +1,25 @@
-// #include "Tutorial03_Texturing.hpp"
+#include <fstream>
 #include "MapHelper.hpp"
 #include "GraphicsUtilities.h"
 #include "TextureUtilities.h"
 #include "ColorConversion.h"
-
-
-#include "SampleBase.hpp"
 #include "BasicMath.hpp"
+#include "ImGuiUtils.hpp"
+#include "imgui.h"
+#include "SampleBase.hpp"
 
 namespace Diligent
 {
 
-class Tutorial03_Texturing final : public SampleBase
+class M_Texture final : public SampleBase
 {
 public:
-    virtual void                       Initialize(const SampleInitInfo& InitInfo) override final;
-    virtual void                       Render() override final;
-    virtual void                       Update(double CurrTime, double ElapsedTime, bool DoUpdateUI) override final;
-    virtual const Char*                GetSampleName() const override final { return "Ming|Texture"; }
-    virtual DesiredApplicationSettings GetDesiredApplicationSettings(bool IsInitialization) override
+    void        Initialize(const SampleInitInfo& InitInfo) override;
+    void        Render() override;
+    void        Update(double CurrTime, double ElapsedTime, bool DoUpdateUI) override;
+    const Char* GetSampleName() const override { return "Ming|Texture"; }
+
+    DesiredApplicationSettings GetDesiredApplicationSettings(bool IsInitialization) override
     {
         DesiredApplicationSettings setting{};
         setting.WindowWidth  = 1280;
@@ -26,6 +27,20 @@ public:
         setting.Flags        = DesiredApplicationSettings::SETTING_FLAG_WINDOW_WIDTH | DesiredApplicationSettings::SETTING_FLAG_WINDOW_HEIGHT;
 
         return setting;
+    }
+
+    void UpdateUI() override
+    {
+        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+        // if (ImGui::Begin("Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::Begin("Settings"))
+        {
+            if (ImGui::Button("Test"))
+            {
+                LOG_INFO_MESSAGE("Test");
+            }
+        }
+        ImGui::End();
     }
 
 private:
@@ -43,12 +58,7 @@ private:
     float4x4                              m_WorldViewProjMatrix;
 };
 
-SampleBase* CreateSample()
-{
-    return new Tutorial03_Texturing();
-}
-
-void Tutorial03_Texturing::CreatePipelineState()
+void M_Texture::CreatePipelineState()
 {
     GraphicsPipelineStateCreateInfo PSOCreateInfo;
     PSOCreateInfo.PSODesc.Name                                  = "Cube PSO";
@@ -131,7 +141,7 @@ void Tutorial03_Texturing::CreatePipelineState()
     m_pPSO->CreateShaderResourceBinding(&m_SRB, true);
 }
 
-void Tutorial03_Texturing::CreateVertexBuffer()
+void M_Texture::CreateVertexBuffer()
 {
     struct Vertex
     {
@@ -183,7 +193,7 @@ void Tutorial03_Texturing::CreateVertexBuffer()
     m_pDevice->CreateBuffer(VertBuffDesc, &VBData, &m_CubeVertexBuffer);
 }
 
-void Tutorial03_Texturing::CreateIndexBuffer()
+void M_Texture::CreateIndexBuffer()
 {
     // clang-format off
     constexpr Uint32 Indices[] =
@@ -208,7 +218,7 @@ void Tutorial03_Texturing::CreateIndexBuffer()
     m_pDevice->CreateBuffer(IndBuffDesc, &IBData, &m_CubeIndexBuffer);
 }
 
-void Tutorial03_Texturing::LoadTexture()
+void M_Texture::LoadTexture()
 {
     TextureLoadInfo loadInfo;
     loadInfo.IsSRGB = true;
@@ -221,8 +231,7 @@ void Tutorial03_Texturing::LoadTexture()
     m_SRB->GetVariableByName(SHADER_TYPE_PIXEL, "g_Texture")->Set(m_TextureSRV);
 }
 
-
-void Tutorial03_Texturing::Initialize(const SampleInitInfo& InitInfo)
+void M_Texture::Initialize(const SampleInitInfo& InitInfo)
 {
     SampleBase::Initialize(InitInfo);
 
@@ -232,7 +241,7 @@ void Tutorial03_Texturing::Initialize(const SampleInitInfo& InitInfo)
     LoadTexture();
 }
 
-void Tutorial03_Texturing::Render()
+void M_Texture::Render()
 {
     ITextureView* pRTV = m_pSwapChain->GetCurrentBackBufferRTV();
     ITextureView* pDSV = m_pSwapChain->GetDepthBufferDSV();
@@ -272,7 +281,7 @@ void Tutorial03_Texturing::Render()
     m_pImmediateContext->DrawIndexed(DrawAttrs);
 }
 
-void Tutorial03_Texturing::Update(double CurrTime, double ElapsedTime, bool DoUpdateUI)
+void M_Texture::Update(double CurrTime, double ElapsedTime, bool DoUpdateUI)
 {
     SampleBase::Update(CurrTime, ElapsedTime, DoUpdateUI);
 
@@ -281,6 +290,11 @@ void Tutorial03_Texturing::Update(double CurrTime, double ElapsedTime, bool DoUp
     float4x4 SrfPreTransform    = GetSurfacePretransformMatrix(float3{0, 0, 1});
     float4x4 Proj               = GetAdjustedProjectionMatrix(PI_F / 4.0f, 0.1f, 100.f);
     m_WorldViewProjMatrix       = CubeModelTransform * View * SrfPreTransform * Proj;
+}
+
+SampleBase* CreateSample()
+{
+    return new M_Texture();
 }
 
 } // namespace Diligent
